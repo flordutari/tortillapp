@@ -5,6 +5,8 @@ const logger = require('morgan');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
+const flash = require('connect-flash');
+const hbs = require('hbs');
 
 const indexRouter = require('./routes/index');
 const authRouter = require('./routes/auth');
@@ -24,6 +26,8 @@ app.use(session({
   }
 }));
 
+app.use(flash());
+
 mongoose.connect('mongodb://localhost/tortillApp', {
   keepAlive: true,
   useNewUrlParser: true,
@@ -33,6 +37,7 @@ mongoose.connect('mongodb://localhost/tortillApp', {
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
+hbs.registerPartials(path.join(__dirname, '/views/partials'));
 
 app.use(logger('dev'));
 app.use(express.json());

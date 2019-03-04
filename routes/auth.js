@@ -5,83 +5,67 @@ const router = express.Router();
 
 const User = require('../models/User');
 
+const { requireAnon, requireUser, requireFields } = require('../middlewares/auth');
+
 const saltRounds = 10;
 
-router.get('/signup', (req, res, next) => {
-  if (req.session.currentUser) {
-    res.redirect('/');
-    return;
-  }
-  res.render('auth/signup');
+router.get('/signup', requireAnon, (req, res, next) => {
+  const data = {
+    messages: req.flash('validation')
+  };
+  res.render('auth/signup', data);
 });
 
-router.post('/signup', async (req, res, next) => {
-  if (req.session.currentUser) {
-    res.redirect('/');
-    return;
-  }
+router.post('/signup', requireAnon, requireFields, async (req, res, next) => {
   // Extraer body
   const { username, password } = req.body;
-  // Comprobar que username y password existen
-  if (!password || !username) {
-    res.redirect('/auth/signup');
-    return;
-  }
   // Comprobar que el usuario no existe en la base de datos
   try {
     const result = await User.findOne({ username: username });
     if (result) {
+      req.flash('validation', 'This username is taken');
       res.redirect('/auth/signup');
       return;
-    } else {
-    // Encriptar el password
-      const salt = bcrypt.genSaltSync(saltRounds);
-      const hashedPassword = bcrypt.hashSync(password, salt);
-      // Crear el usuario
-      const newUser = {
-        username,
-        password: hashedPassword
-      };
-
-      const createdUser = await User.create(newUser);
-
-      // Guardamos el usuario
-      req.session.currentUser = createdUser;
-
-      // Redirigimos para la homepage
-
-      res.redirect('/');
     }
+    // Encriptar el password
+    const salt = bcrypt.genSaltSync(saltRounds);
+    const hashedPassword = bcrypt.hashSync(password, salt);
+    // Crear el usuario
+    const newUser = {
+      username,
+      password: hashedPassword
+    };
+
+    const createdUser = await User.create(newUser);
+
+    // Guardamos el usuario
+    req.session.currentUser = createdUser;
+
+    // Redirigimos para la homepage
+
+    res.redirect('/');
   } catch (error) {
     next(error);
   }
   // res.render('auth/signup');
 });
 
-router.get('/login', (req, res, next) => {
-  if (req.session.currentUser) {
-    res.redirect('/');
-    return;
-  }
-  res.render('auth/login');
+router.get('/login', requireAnon, (req, res, next) => {
+  const data = {
+    messages: req.flash('validation')
+  };
+  res.render('auth/login', data);
 });
 
-router.post('/login', async (req, res, next) => {
-  if (req.session.currentUser) {
-    res.redirect('/');
-    return;
-  }
+router.post('/login', requireAnon, requireFields, async (req, res, next) => {
   // Extraer informacion del body
   const { username, password } = req.body;
-  // Comprobar que hay usuario y password
-  if (!password || !username) {
-    res.redirect('/auth/login');
-    return;
-  }
+
   try {
   // Comprobar que el usuario existe en la db
     const user = await User.findOne({ username });
     if (!user) {
+      req.flash('validation', 'Username or password incorrect');
       res.redirect('/auth/login');
       return;
     }
@@ -92,6 +76,7 @@ router.post('/login', async (req, res, next) => {
       // Redirigir
       res.redirect('/');
     } else {
+      req.flash('validation', 'Username or password incorrect');
       res.redirect('/auth/login');
     }
   } catch (error) {
@@ -99,11 +84,7 @@ router.post('/login', async (req, res, next) => {
   }
 });
 
-router.post('/logout', (req, res, next) => {
-  if (!req.session.currentUser) {
-    res.redirect('/');
-    return;
-  }
+router.post('/logout', requireUser, (req, res, next) => {
   delete req.session.currentUser;
   res.redirect('/');
 });
