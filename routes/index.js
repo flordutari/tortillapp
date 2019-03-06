@@ -20,8 +20,8 @@ router.get('/new', requireUser, (req, res, next) => {
 });
 
 router.post('/', requireUser, async (req, res, next) => {
-  const { _id, name, special, size } = req.body;
-  const tortilla = { name, special, size };
+  const { _id, name, special, size, latitude, longitude } = req.body;
+  const tortilla = { name, special, size, latitude, longitude };
   try {
     if (_id) {
       await Tortilla.findByIdAndUpdate(_id, tortilla);

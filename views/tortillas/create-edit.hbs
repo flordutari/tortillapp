@@ -1,18 +1,40 @@
-<form action="/" method="POST">
- <input type="text" name="name" value="{{name}}">
- <input type="text" name="special" value="{{special}}">
+<form action="/" class="js-create-tortilla" method="POST">
+  <div>
+    <label for="">Name</label>
+    <input type="text" name="name" value="{{name}}">
+  </div>
 
- <select id="size-select" name="size" value="{{size}}">
-   <option value="small">Small</option>
-   <option value="medium">Medium</option>
-   <option value="big">Big</option>
- </select>
+  <div>
+    <label for="">Special</label>
+    <input type="text" name="special" value="{{special}}">
+  </div>
 
- {{#if name}}
- <input type="hidden" name="_id" value="{{_id}}">
- <button type="submit">Editar tortilla</button>
- {{else}}
- <button type="submit">Create yo' tortilla!</button>
- {{/if}}
+  <div>
+    <label for="">Size</label>
+    <select id="size-select" name="size" value="{{size}}">
+      <option value="small">Small</option>
+      <option value="medium">Medium</option>
+      <option value="big">Big</option>
+    </select>
+  </div>
+
+  <div>
+    <label for="latitude">Latitude</label>
+    <input type="text" id="latitude" name="latitude">
+  </div>
+
+  <div>
+    <label for="longitude">Longitude</label>
+    <input type="text" id="longitude" name="longitude">
+  </div>
+
+  {{#if name}}
+  <input type="hidden" name="_id" value="{{_id}}">
+  <button type="submit" disabled>Edit tortilla</button>
+  {{else}}
+  <button type="submit" disabled>Create yo' tortilla</button>
+  {{/if}}
 
 </form>
+
+<script src="/javascripts/location.js"></script>
